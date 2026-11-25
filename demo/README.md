@@ -74,10 +74,14 @@ One finding is accepted in the app's `.nsc-ignore`, to show how that looks.
 
 - `demo-output.svg` is a still picture of real output from a quick check of
   the demo app.
-- For an animated version, install [VHS](https://github.com/charmbracelet/vhs)
-  and run `vhs demo/demo.tape` from the repository root. It writes
-  `demo/demo.gif`; point the image line at the top of the main README at that
-  file instead.
+- For an animated version, `demo.tape` records `demo/demo.gif` with
+  [VHS](https://github.com/charmbracelet/vhs). Either:
+  - run the **Record demo GIF** workflow (Actions tab → Run workflow, or
+    `gh workflow run demo-gif.yml`) and download the `demo-gif` file from the
+    run, or
+  - install VHS and run `vhs demo/demo.tape` from the repository root.
+
+  Then point the image line at the top of the main README at `demo/demo.gif`.
 
 ## Files
 
@@ -88,5 +92,5 @@ One finding is accepted in the app's `.nsc-ignore`, to show how that looks.
 | `make-demo-app.sh` | Builds the fake app (`demo-shop`) into a new folder |
 | `make-insecure-server.sh` | Writes the weak server settings (container or scratch folder only) |
 | `start.sh` | Starts Redis, the app, the fake miner and nginx inside the container |
-| `demo.tape` | Script for recording the terminal GIF with VHS |
+| `demo.tape` | Script for recording the terminal GIF with VHS (also run by `.github/workflows/demo-gif.yml`) |
 | `demo-output.svg` | Still picture of the output, shown in the main README |

@@ -1884,6 +1884,31 @@ if [[ -f "$DEMO/make-demo-app.sh" && -f "$DEMO/make-insecure-server.sh" ]]; then
   fi
 fi
 
+
+group "Display fixes found by the first real demo run"
+# 1. The "run it as its own user" hint sits under the root finding, not under the next one.
+BINS="srv-bad"; SYSROOT="$T/sys-bad"; ENVS=""
+# shellcheck disable=SC2086
+t "root and debugger findings (for the JSON)" 2 "Node process running as root" ""                                   $SRV --runner other --json "$T/disp1.json" p/s-app
+SYSROOT=""; BINS=""
+CHK="root hint is attached to the root finding"
+chk node -e 'const r=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); const g=(id)=>r.findings.find(x=>x.id===id); const root=g("SRV-NODE-ROOT"), dbg=g("SRV-NODE-INSPECT"); if(!root||!dbg) process.exit(1); const h="Run it as its own unprivileged user."; if(!root.details.some(d=>d.includes(h))) process.exit(1); if(dbg.details.some(d=>d.includes(h))) process.exit(1);' "$T/disp1.json"
+# 2. A committed .env listed by line is not listed a second time without one.
+proj disp2; put p/disp2/.env 'VITE_DB_PASSWORD=x'; put p/disp2/src/a.js 'const s = process.env.NEXT_PUBLIC_API_SECRET;'; gitify disp2
+BINS="ok"
+t "public variable in a committed .env"      2 ".env:1" ""                                                          --only code --json "$T/disp2.json" p/disp2
+CHK=".env is listed once"
+chk node -e 'const r=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); const f=r.findings.find(x=>x.id==="CODE-PUBLIC-ENV"); if(!f) process.exit(1); const envs=f.details.filter(d=>d===".env"||d.startsWith(".env:")); if(envs.length!==1||envs[0]!==".env:1") process.exit(1); if(!f.details.includes("src/a.js:1")) process.exit(1);' "$T/disp2.json"
+# 3. The same Node.js version, installed and running, is reported once.
+printf '#!/bin/sh\necho %s\n' "$(node --version)" > fake-node-same; chmod +x fake-node-same
+mkdir -p sys-same/proc/812; printf 'NODE_ENV=production\0' > sys-same/proc/812/environ
+ln -s "$T/fake-node-same" sys-same/proc/812/exe; ln -s "$T/app-live" sys-same/proc/812/cwd
+BINS="srv-best"; SYSROOT="$T/sys-same"
+t "installed and running Node (for the JSON)" 0 "RESULT" ""                                                         --skip code --pm bun --server vps --proxy none --runner other --no-network --json "$T/disp3.json" p/clean
+SYSROOT=""; BINS=""
+CHK="the same Node.js version is reported once"
+chk node -e 'const r=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); const n=r.findings.filter(x=>x.id==="PKG-NODE-EOL"); if(n.length!==1||!n[0].message.includes("installed on this machine")) process.exit(1);' "$T/disp3.json"
+
 # ====================================================== REAL AUDITS =======
 if [[ "${RUN_NETWORK_TESTS:-0}" == "1" ]]; then
   group "Real audits (network)"

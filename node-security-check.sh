@@ -1018,10 +1018,14 @@ node_eol_date() {
     *)  if [[ "$1" -lt 26 ]]; then echo 2000-01-01; else echo unknown; fi ;;
   esac
 }
+NODE_MAJORS_SEEN=" "
 check_node_major() {   # $1 major version, $2 where it came from
   local major="$1" where="$2" eol
   case "${major}" in ""|*[!0-9]*) return ;; esac
   [[ "${#major}" -gt 3 ]] && return
+  # The same version found in two places (installed, running) is reported once.
+  case "${NODE_MAJORS_SEEN}" in *" ${major} "*) return ;; esac
+  NODE_MAJORS_SEEN="${NODE_MAJORS_SEEN}${major} "
   eol="$(node_eol_date "${major}")"
   if [[ "${eol}" == "unknown" ]]; then
     ok PKG-NODE-EOL "Node.js ${major} (${where}) is newer than this script's end-of-life table."
@@ -1760,7 +1764,12 @@ part_code() {
     # Variables with these prefixes are copied into the browser bundle.
     local pubre='(NEXT_PUBLIC|VITE|REACT_APP|NUXT_PUBLIC|EXPO_PUBLIC|GATSBY|PUBLIC)_[A-Z0-9_]*(SECRET|PRIVATE|PASSWORD|PASSWD)[A-Z0-9_]*'
     scan "${pubre}" all > "${TMP}/pubenv.txt"
-    grep -lE "${pubre}" "${PROJECT_DIR}"/.env* 2>/dev/null | sed "s|^${PROJECT_DIR}/||" >> "${TMP}/pubenv.txt" || true
+    # .env files are usually not committed, so they are searched separately;
+    # one already listed with a line number is not listed again.
+    grep -lE "${pubre}" "${PROJECT_DIR}"/.env* 2>/dev/null | sed "s|^${PROJECT_DIR}/||" \
+      | awk 'NR == FNR { i = index($0, ":"); if (i > 0) seen[substr($0, 1, i - 1)] = 1; next } !($0 in seen)' "${TMP}/pubenv.txt" - \
+      > "${TMP}/pubenv-extra.txt" || true
+    cat "${TMP}/pubenv-extra.txt" >> "${TMP}/pubenv.txt"
     filter_locs CODE-PUBLIC-ENV "${TMP}/pubenv.txt"
     if [[ -s "${TMP}/pubenv.txt" ]]; then
       warn CODE-PUBLIC-ENV "A variable named like a secret has a prefix that sends it to the browser (NEXT_PUBLIC_, VITE_, REACT_APP_...):"
@@ -2282,12 +2291,15 @@ server_processes() {
   while read -r user pid args; do
     args="$(clean "${args}")"
     if [[ "${user}" == "root" ]]; then
-      root_seen=1
       if [[ "${SERVER}" == "docker" ]]; then
         warn SRV-NODE-ROOT "Node process running as root (PID ${pid}): ${args:0:80}"
       else
         high SRV-NODE-ROOT "Node process running as root (PID ${pid}): ${args:0:80}"
       fi
+      if [[ "${root_seen}" -eq 0 ]]; then
+        hint "If the app is broken into, the attacker gets the same rights as the app. Run it as its own unprivileged user."
+      fi
+      root_seen=1
     fi
     case " ${args} " in
       *" --inspect"*)
@@ -2299,11 +2311,7 @@ server_processes() {
         esac ;;
     esac
   done < "${NODE_PS}"
-  if [[ "${root_seen}" -eq 1 ]]; then
-    hint "If the app is broken into, the attacker gets the same rights as the app. Run it as its own unprivileged user."
-  else
-    ok SRV-NODE-ROOT "No Node process runs as root."
-  fi
+  [[ "${root_seen}" -eq 0 ]] && ok SRV-NODE-ROOT "No Node process runs as root."
   [[ "${inspect_seen}" -eq 0 ]] && ok SRV-NODE-INSPECT "No Node process has the debugger (--inspect) switched on."
 }
 
