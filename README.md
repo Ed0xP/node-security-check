@@ -12,7 +12,7 @@ It works with **npm, pnpm, Yarn and Bun**. It only reads: it never installs,
 updates or deletes anything. The only files it writes are the reports and
 saved answers you ask for.
 
-![Terminal output of the script run against the demo app](demo/demo-output.svg)
+![Terminal output of the script run against the demo app](demo/demo.gif)
 
 *An excerpt of real output, from a quick check of the fake [demo app](demo/README.md).
 The full, current output of every run is on the summary page of the latest
