@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 982 802" width="982" height="802" role="img" aria-label="Terminal output of node-security-check.sh run against the demo app: one compromise alert, several high-level problems and warnings, ending in a FAIL result.">
+<rect width="982" height="802" rx="10" fill="#0d1117"/>
+<rect width="982" height="30" rx="10" fill="#161b22"/><rect y="20" width="982" height="10" fill="#161b22"/>
+<circle cx="18" cy="15" r="5.5" fill="#ff5f56"/><circle cx="36" cy="15" r="5.5" fill="#ffbd2e"/><circle cx="54" cy="15" r="5.5" fill="#27c93f"/>
+<g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="14" fill="#c9d1d9" xml:space="preserve">
+<text x="18" y="58"><tspan fill="#3fb950" font-weight="700">$ </tspan><tspan fill="#f0f6fc">./node-security-check.sh --quick --skip server /tmp/demo-shop</tspan></text>
+<text x="18" y="78"><tspan fill="#f0f6fc" font-weight="700">== Part 1 of 3: packages and dependencies ==</tspan></text>
+<text x="18" y="98"><tspan fill="#f0f6fc" font-weight="700">-- Known-compromised package versions --</tspan></text>
+<text x="18" y="118">  <tspan fill="#ff7b72" font-weight="700">[ALERT]</tspan> Known-malicious version in the lockfile: @tanstack/history@1.161.9  (source: TanStack 2026-05 (GHSA-g…</text>
+<text x="18" y="138"><tspan fill="#8b949e">  ⋮</tspan></text>
+<text x="18" y="158"><tspan fill="#f0f6fc" font-weight="700">-- Known vulnerabilities (npm audit) --</tspan></text>
+<text x="18" y="178">  <tspan fill="#ff7b72">[HIGH]</tspan> npm audit: 3 known vulnerabilities at or above 'critical' (critical=3 high=2 moderate=1 low=0; all dep…</text>
+<text x="18" y="198">         critical  @tanstack/history: Malware in @tanstack/history</text>
+<text x="18" y="218">         critical  minimist: Prototype Pollution in minimist</text>
+<text x="18" y="238"><tspan fill="#8b949e">  ⋮</tspan></text>
+<text x="18" y="258"><tspan fill="#f0f6fc" font-weight="700">== Part 2 of 3: code and project files ==</tspan></text>
+<text x="18" y="278"><tspan fill="#f0f6fc" font-weight="700">-- Secrets --</tspan></text>
+<text x="18" y="298">  <tspan fill="#ff7b72">[HIGH]</tspan> .env file(s) committed to git. Anyone with the repository has those values.<tspan fill="#8b949e">  (CODE-ENV-COMMITTED)</tspan></text>
+<text x="18" y="318">  <tspan fill="#ff7b72">[HIGH]</tspan> AWS access key ID: 1 line in files committed to git<tspan fill="#8b949e">  (CODE-SECRET-AWS)</tspan></text>
+<text x="18" y="338">           config/aws.js:2</text>
+<text x="18" y="358">  <tspan fill="#ff7b72">[HIGH]</tspan> Stripe or Clerk live key: 2 lines in files committed to git<tspan fill="#8b949e">  (CODE-SECRET-STRIPE)</tspan></text>
+<text x="18" y="378"><tspan fill="#8b949e">  ⋮</tspan></text>
+<text x="18" y="398"><tspan fill="#f0f6fc" font-weight="700">-- Risky code patterns (pattern matches: each one needs a person to look) --</tspan></text>
+<text x="18" y="418">  <tspan fill="#d29922">[WARN]</tspan> eval() or new Function(): 1 line<tspan fill="#8b949e">  (CODE-EVAL)</tspan></text>
+<text x="18" y="438">  <tspan fill="#d29922">[WARN]</tspan> Shell command built from variables: 1 line<tspan fill="#8b949e">  (CODE-SHELL)</tspan></text>
+<text x="18" y="458">  <tspan fill="#d29922">[WARN]</tspan> SQL built by joining strings: 1 line<tspan fill="#8b949e">  (CODE-SQL)</tspan></text>
+<text x="18" y="478"><tspan fill="#8b949e">  [SKIP] MD5 or SHA-1 hashing: 1 line  (CODE-WEAK-HASH; accepted: MD5 is only used to build a cache key here, n…</tspan></text>
+<text x="18" y="498"><tspan fill="#8b949e">  ⋮</tspan></text>
+<text x="18" y="518"><tspan fill="#f0f6fc" font-weight="700">-- Docker files --</tspan></text>
+<text x="18" y="538">  <tspan fill="#ff7b72">[HIGH]</tspan> Dockerfile: copies a .env file into the image. Anyone who can pull the image can read it.  (CODE-DOCKE…</text>
+<text x="18" y="558">  <tspan fill="#ff7b72">[HIGH]</tspan> docker-compose.yml: a service runs with 'privileged: true', which gives the container full control of …</text>
+<text x="18" y="578"><tspan fill="#8b949e">  ⋮</tspan></text>
+<text x="18" y="598"><tspan fill="#f0f6fc" font-weight="700">== Summary ==</tspan></text>
+<text x="18" y="618">  Compromise indicators   : 1</text>
+<text x="18" y="638">  High-level problems     : 7</text>
+<text x="18" y="658">  Warnings                : 20</text>
+<text x="18" y="678">  Notes                   : 4</text>
+<text x="18" y="698">  Checks that didn't run  : 0</text>
+<text x="18" y="718">  Accepted in .nsc-ignore : 1</text>
+<text x="18" y="738">  Passed                  : 5</text>
+<text x="18" y="758"><tspan fill="#ff7b72" font-weight="700">RESULT: FAIL - possible supply-chain COMPROMISE.</tspan></text>
+<text x="18" y="778">   - Known-malicious version in the lockfile: @tanstack/history@1.161.9  (source: TanStack 2026-05 (GHSA-g7cv-r…</text>
+</g>
+</svg>

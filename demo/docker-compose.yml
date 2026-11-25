@@ -1,0 +1,14 @@
+# The demo server for node-security-check: DELIBERATELY INSECURE.
+# Its web port is published on this machine only (127.0.0.1). Do not change
+# that to 0.0.0.0, and do not run this on a server.
+services:
+  demo:
+    build:
+      context: ..
+      dockerfile: demo/Dockerfile
+    container_name: nsc-demo
+    ports:
+      - "127.0.0.1:8080:80"
+    volumes:
+      # The repository, read-only, so the container runs your current copy of the script.
+      - ..:/opt/nsc:ro
